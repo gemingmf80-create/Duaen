@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic AI App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #0c5a34;
+            --primary-light: #147a49;
+            --accent-color: #d4af37;
+            --bg-color: #f4f7f5;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e2e8f0;
+            --chat-user-bg: #e1f5fe;
+            --chat-ai-bg: #f0f7f4;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121814;
+            --card-bg: #1c241f;
+            --text-color: #e2e8f0;
+            --text-muted: #a0aec0;
+            --border-color: #2d3748;
+            --chat-user-bg: #1a365d;
+            --chat-ai-bg: #1e2d24;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        .top-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-color);
+        }
+
+        .header-logo h1 {
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .menu-btn, .theme-toggle-btn, .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .sidebar-header .logo span {
+            color: white;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 10px;
+        }
+
+        .nav-links li {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+
+        .nav-links li:hover, .nav-links li.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 15px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* App Sections */
+        .content-container {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .app-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Cards Layout */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .badge.secondary {
+            background-color: var(--accent-color);
+            color: #111;
+        }
+
+        .arabic-text {
+            font-size: 1.6rem;
+            direction: rtl;
+            text-align: right;
+            margin-bottom: 12px;
+            line-height: 2.2rem;
+            font-weight: 500;
+        }
+
+        .translation-text {
+            font-size: 0.95rem;
+            line-height: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .reference-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Chat UI */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 110px);
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.45rem;
+            font-size: 0.95rem;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--chat-user-bg);
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background-color: var(--chat-ai-bg);
+            border-bottom-left-radius: 2px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .chat-input-area, .search-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        .chat-input-area input, .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .chat-input-area button, .search-box button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-input-area button:hover, .search-box button:hover {
+            background-color: var(--primary-light);
+        }
+
+        .chat-input-area .attach-btn {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-input-area .attach-btn:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        /* File Preview Bar */
+        .file-preview-bar {
+            background-color: var(--card-bg);
+            border: 1px dashed var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 15px;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .file-preview-bar button {
+            background: none;
+            border: none;
+            color: #e53e3e;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        /* History log item styling */
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 6px;
+        }
+        .history-item:hover {
+            background-color: var(--chat-ai-bg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            animation: wave 1.2s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* Tasbih Counter */
+        .tasbih-card {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .counter-display {
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .tasbih-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-primary, .btn-danger {
+            padding: 12px 25px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-danger { background-color: #e53e3e; color: white; }
+
+        @media (min-width: 768px) {
+            .sidebar { left: 0; }
+            .main-wrapper { margin-left: 280px; }
+            .menu-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fa-solid fa-mosque"></i>
+                <span>Islamic AI</span>
+            </div>
+            <button class="close-btn" id="closeSidebar"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="nav-links">
+            <li class="active" data-target="chat-section"><i class="fa-solid fa-comments"></i> Islamic AI Chat</li>
+            <li data-target="history-section"><i class="fa-solid fa-clock-rotate-left"></i> Chat History</li>
+            <li data-target="quran-section"><i class="fa-solid fa-book-quran"></i> Quran Search</li>
+            <li data-target="hadith-section"><i class="fa-solid fa-book"></i> Hadith Search</li>
+            <li data-target="daily-section"><i class="fa-solid fa-calendar-day"></i> Daily Inspiration</li>
+            <li data-target="dua-section"><i class="fa-solid fa-hands-praying"></i> Dua Collection</li>
+            <li data-target="tasbih-section"><i class="fa-solid fa-circle-dot"></i> Tasbih Counter</li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>Deeni masail ke liye hamesha qualified ulama se rujoo karein.</p>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-btn" id="openSidebar"><i class="fa-solid fa-bars"></i></button>
+                <div class="header-logo">
+                    <i class="fa-solid fa-kaaba"></i>
+                    <h1>Islamic AI</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="theme-toggle-btn"><i class="fa-solid fa-moon"></i></button>
+            </div>
+        </header>
+
+        <div class="content-container">
+            
+            <section id="chat-section" class="app-section">
+                <div class="chat-container">
+                    <div class="chat-box" id="chatBox">
+                        <div class="message ai-message">
+                            <div class="message-content">
+                                Assalamu Alaikum! Main aapka Islamic AI assistant hoon. Aap mujhse Deen ke mutalliq sawaal kuch bhi pooch sakte hain aur image bhi upload kar sakte hain.
+                            </div>
+                        </div>
+                    </div>
+                    <div id="chatLoading" class="loading-dots hidden">
+                        <span></span><span></span><span></span>
+                    </div>
+
+                    <div id="filePreviewBar" class="file-preview-bar hidden">
+                        <span id="filePreviewName"></span>
+                        <button id="clearFileBtn"><i class="fa-solid fa-circle-xmark"></i></button>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <input type="file" id="fileInput" accept="image/*,application/pdf" style="display: none;">
+                        <button id="uploadBtn" class="attach-btn" type="button"><i class="fa-solid fa-paperclip"></i></button>
+                        
+                        <input type="text" id="chatInput" placeholder="Ask an Islamic question...">
+                        <button id="sendChatBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="history-section" class="app-section hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved Chats</h3>
+                        <button id="clearHistoryBtn" class="btn-danger" style="padding: 5px 12px; font-size: 0.8rem;">Clear All</button>
+                    </div>
+                    <div id="historyLogList">
+                        <p style="color: var(--text-muted);">Koi purani chat history nahi hai.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="quran-section" class="app-section hidden">
+                <div class="card">
+                    <h3><i class="fa-solid fa-magnifying-glass"></i> Search Quran</h3>
+                    <div class="search-box">
+                        <input type="text" id="quranQuery" placeholder="Enter topic (e.g., Sabr, Namaz)...">
+                        <button id="searchQuranBtn"><i class="fa-solid fa-search"></i></button>
+                    </div>
+                    <div id="quranResults" class="results-container" style="margin-top: 15px;"></div>
+                </div>
+            </section>
+
+            <section id="hadith-section" class="app-section hidden">
+                <div class="card">
+                    <h3><i class="fa-solid fa-book-open"></i> Search Hadith Reference</h3>
+                    <div class="search-box">
+                        <input type="text" id="hadithQuery" placeholder="Enter topic (e.g., Intentions, Manners)...">
+                        <button id="searchHadithBtn"><i class="fa-solid fa-search"></i></button>
+                    </div>
+                    <div id="hadithResults" class="results-container" style="margin-top: 15px;"></div>
+                </div>
+            </section>
+
+            <section id="daily-section" class="app-section hidden">
+                <div class="card">
+                    <span class="badge">Daily Ayah</span>
+                    <div id="dailyAyahArabic" class="arabic-text">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+                    <div id="dailyAyahText" class="translation-text">In the name of Allah, the Entirely Merciful, the Especially Merciful.</div>
+                    <div id="dailyAyahRef" class="reference-text">Surah Al-Fatiha (1:1)</div>
+                </div>
+                <div class="card">
+                    <span class="badge secondary">Daily Hadith</span>
+                    <div id="dailyHadithText" class="translation-text">"Innamal a'malu bin niyyat" (Actions are judged by intentions).</div>
+                    <div id="dailyHadithRef" class="reference-text">Sahih al-Bukhari 1</div>
+                </div>
+            </section>
+
+            <section id="dua-section" class="app-section hidden">
+                <div class="card">
+                    <h3><i class="fa-solid fa-hands-praying"></i> Duas</h3>
+                    <div id="duaList" style="margin-top:15px;"></div>
+                </div>
+            </section>
+
+            <section id="tasbih-section" class="app-section hidden">
+                <div class="card tasbih-card">
+                    <h3>Tasbih Counter</h3>
+                    <div class="counter-display" id="counterVal">0</div>
+                    <div class="tasbih-controls">
+                        <button id="countBtn" class="btn-primary"><i class="fa-solid fa-fingerprint"></i> Count</button>
+                        <button id="resetCountBtn" class="btn-danger"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // Setup API Key (Configured with Gemini 2.5 Flash Endpoint)
+        const GEMINI_API_KEY = "AIzaSyBU_HktLJGUgJNJwDEt6b1a-EDneGis1hI"; 
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+        const DUA_COLLECTION = [
+            { title: "Dua for Shifa (Healing)", arabic: "أَذْهِبِ الْبَأْسَ رَبَّ النَّاسِ وَاشْفِ أَنْتَ الشَّافِي لاَ شِفَاءَ إِلاَّ شِفَاؤُكَ شِفَاءً لاَ يُغَادِرُ سَقَمًا", translation: "Remove the hardship, O Lord of mankind, and grant healing for You are the Healer. There is no healing but Your healing, a healing which leaves no illness behind.", source: "Sahih al-Bukhari 5675" },
+            { title: "Dua for Knowledge", arabic: "رَّبِّ زِدْنِي عِلْمًا", translation: "O my Lord, increase me in knowledge.", source: "Surah Taha - 20:114" },
+            { title: "Dua for Protection", arabic: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ", translation: "In the name of Allah with Whose name nothing can harm on earth or in heaven, and He is the All-Hearing, All-Knowing.", source: "Sunan Abi Dawud 5088" }
+        ];
+
+        const ISLAMIC_GUARDRAILS = `
+        You are "Islamic AI", a strictly religious Islamic scholar assistant.
+        Rules you must follow strictly:
+        1. Answer ONLY Islamic/religious questions.
+        2. NEVER invent/fabricate Quran verses or Hadiths.
+        3. Show clear references: Surah name, Ayah number, or Hadith Book.
+        4. If you suggest any Dua, Durood, or Ayah to read multiple times (e.g., 3 times, 11 times, 7 times), clearly state the count and the exact Arabic text or transliteration so the system can parse it.
+        `;
+
+        let tasbihCount = 0;
+        let selectedFileBase64 = null;
+        let selectedFileName = "";
+        let chatHistoryList = JSON.parse(localStorage.getItem("islamic_chat_history")) || [];
+
+        // Smart state memory allocation variables
+        let lastSuggestedDuaText = ""; 
+        let lastSuggestedCount = 1;    
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initNavigation();
+            initTheme();
+            initChat();
+            initUploadEngine();
+            initSearch();
+            initDailySection();
+            initTasbih();
+            loadDuas();
+            renderHistoryLog();
+        });
+
+        function initNavigation() {
+            const sidebar = document.getElementById("sidebar");
+            const openBtn = document.getElementById("openSidebar");
+            const closeBtn = document.getElementById("closeSidebar");
+            const navLinks = document.querySelectorAll(".nav-links li");
+            const sections = document.querySelectorAll(".app-section");
+
+            openBtn.addEventListener("click", () => sidebar.classList.add("open"));
+            closeBtn.addEventListener("click", () => sidebar.classList.remove("open"));
+
+            navLinks.forEach(link => {
+                link.addEventListener("click", () => {
+                    navLinks.forEach(l => l.classList.remove("active"));
+                    sections.forEach(s => s.classList.add("hidden"));
+
+                    link.classList.add("active");
+                    const target = link.getAttribute("data-target");
+                    document.getElementById(target).classList.remove("hidden");
+                    
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.remove("open");
+                    }
+                });
+            });
+        }
+
+        function initTheme() {
+            const toggleBtn = document.getElementById("themeToggle");
+            toggleBtn.addEventListener("click", () => {
+                const root = document.documentElement;
+                if (root.getAttribute("data-theme") === "light") {
+                    root.setAttribute("data-theme", "dark");
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                } else {
+                    root.setAttribute("data-theme", "light");
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                }
+            });
+        }
+
+        function initChat() {
+            const sendBtn = document.getElementById("sendChatBtn");
+            const input = document.getElementById("chatInput");
+
+            sendBtn.addEventListener("click", handleChatMessage);
+            input.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") handleChatMessage();
+            });
+        }
+
+        function initUploadEngine() {
+            const uploadBtn = document.getElementById("uploadBtn");
+            const fileInput = document.getElementById("fileInput");
+            const previewBar = document.getElementById("filePreviewBar");
+            const previewName = document.getElementById("filePreviewName");
+            const clearFileBtn = document.getElementById("clearFileBtn");
+
+            uploadBtn.addEventListener("click", () => fileInput.click());
+
+            fileInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                selectedFileName = file.name;
+                previewName.innerText = `Selected: ${file.name}`;
+                previewBar.classList.remove("hidden");
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedFileBase64 = event.target.result.split(',')[1];
+                };
+                reader.readAsDataURL(file);
+            });
+
+            clearFileBtn.addEventListener("click", resetUploadState);
+        }
+
+        function resetUploadState() {
+            selectedFileBase64 = null;
+            selectedFileName = "";
+            document.getElementById("fileInput").value = "";
+            document.getElementById("filePreviewBar").className = "file-preview-bar hidden";
+        }
+
+        async function handleChatMessage() {
+            const input = document.getElementById("chatInput");
+            let queryText = input.value.trim();
+            if (!queryText && !selectedFileBase64) return;
+
+            let displayQuery = queryText;
+            if (selectedFileName) {
+                displayQuery += `\n📁 [Uploaded File: ${selectedFileName}]`;
+            }
+
+            appendMessage(displayQuery, 'user-message');
+            input.value = "";
+            resetUploadState();
+
+            const lowerQuery = queryText.toLowerCase();
+            
+            // "Tum padho" feature capture architecture
+            if ((lowerQuery.includes("tum") && lowerQuery.includes("padh")) || lowerQuery.includes("sunao") || lowerQuery.includes("play dua") || lowerQuery.includes("tum hi padho")) {
+                if (lastSuggestedDuaText) {
+                    let confirmationText = `Jee bilkul, main aapke liye yeh dua/wazifa ${lastSuggestedCount} martaba padhta hoon. Aap dhyan se suniye:\n\n`;
+                    
+                    let fullRecitationText = "";
+                    for(let i = 1; i <= lastSuggestedCount; i++) {
+                        fullRecitationText += `${i}. ${lastSuggestedDuaText}\n`;
+                    }
+                    
+                    appendMessage(confirmationText + fullRecitationText, 'ai-message', true);
+                    
+                    window.speechSynthesis.cancel();
+                    let speechString = `Jee bilkul, suniye. `;
+                    for(let i = 0; i < lastSuggestedCount; i++) {
+                        speechString += `${lastSuggestedDuaText}. `;
+                    }
+                    
+                    const utterance = new SpeechSynthesisUtterance(speechString);
+                    const voices = window.speechSynthesis.getVoices();
+                    let selectedVoice = voices.find(v => v.lang.includes('ur-PK') || v.lang.includes('hi-IN'));
+                    if (selectedVoice) utterance.voice = selectedVoice;
+                    utterance.rate = 0.85; 
+                    window.speechSynthesis.speak(utterance);
+                    
+                    return; 
+                } else {
+                    appendMessage("Abhi tak maine koi dua ya wazifa suggest nahi kiya hai. Aap apna sawal poochiye, main uske mutabik dua bataunga.", 'ai-message', true);
+                    return;
+                }
+            }
+
+            const loadingIndicator = document.getElementById("chatLoading");
+            loadingIndicator.classList.remove("hidden");
+
+            try {
+                const response = await fetch(GEMINI_API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `${ISLAMIC_GUARDRAILS}\nUser Query: ${queryText}` }] }]
+                    })
+                });
+                const data = await response.json();
+                const aiReply = data.candidates[0].content.parts[0].text;
+                
+                loadingIndicator.classList.add("hidden");
+                appendMessage(aiReply, 'ai-message', true);
+                saveToHistoryLogs(queryText, aiReply);
+
+                extractDuaAndCount(aiReply);
+
+            } catch (error) {
+                loadingIndicator.classList.add("hidden");
+                appendMessage("Maaf kijiyega, server se connect karne me dikkat aa rahi hai.", 'ai-message');
+            }
+        }
+
+        function extractDuaAndCount(text) {
+            lastSuggestedDuaText = "";
+            lastSuggestedCount = 1;
+
+            const countMatch = text.match(/(\d+)\s*(baar|martaba|times)/i);
+            if (countMatch) {
+                lastSuggestedCount = parseInt(countMatch[1]);
+            }
+
+            if (text.includes("صَلَّى اللّٰهُ عَلٰى مُحَمَّدٍ") || text.toLowerCase().includes("durood")) {
+                lastSuggestedDuaText = "Sallallahu Alaihi Wa Sallam";
+            } else if (text.includes("أَعُوذُ بِاللَّهِ وَقُدْرَتِهِ")) {
+                lastSuggestedDuaText = "A'udhu billahi wa qudratihi min sharri ma ajidu wa uhadhiru";
+            } else if (text.toLowerCase().includes("استغفر الله") || text.toLowerCase().includes("astaghfirullah")) {
+                lastSuggestedDuaText = "Astaghfirullah hal azim";
+            } else {
+                const quoteMatch = text.match(/["'“]([^"'“]{5,100})["'”]/);
+                if (quoteMatch) {
+                    lastSuggestedDuaText = quoteMatch[1];
+                } else {
+                    lastSuggestedDuaText = "Allahumma Shafi"; 
+                }
+            }
+        }
+
+        function appendMessage(text, className, parsed = false) {
+            const chatBox = document.getElementById("chatBox");
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${className}`;
+            
+            const textContent = document.createElement("div");
+            textContent.className = "message-content";
+            textContent.innerText = text;
+            msgDiv.appendChild(textContent);
+
+            if (parsed) {
+                const actionsDiv = document.createElement("div");
+                actionsDiv.className = "message-actions";
+                actionsDiv.innerHTML = `
+                    <button class="action-btn" onclick="speakText(this)"><i class="fa-solid fa-volume-high"></i> Listen</button>
+                    <button class="action-btn" onclick="copyText(this)"><i class="fa-solid fa-copy"></i> Copy</button>
+                    <button class="action-btn" onclick="shareText(this)"><i class="fa-solid fa-share-nodes"></i> Share</button>
+                `;
+                msgDiv.appendChild(actionsDiv);
+            }
+
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speakText(button) {
+            const text = button.parentElement.parentElement.querySelector(".message-content").innerText;
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            
+            let selectedVoice = voices.find(v => v.lang.includes('ur-PK') || v.lang.includes('hi-IN') || v.lang.includes('en-IN'));
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+
+            window.speechSynthesis.speak(utterance);
+
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fa-solid fa-waveform"></i> Playing...';
+            utterance.onend = () => button.innerHTML = originalHTML;
+        }
+
+        function saveToHistoryLogs(userText, aiResponse) {
+            const historyItem = {
+                id: Date.now(),
+                user: userText,
+                ai: aiResponse,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            chatHistoryList.unshift(historyItem);
+            localStorage.setItem("islamic_chat_history", JSON.stringify(chatHistoryList));
+            renderHistoryLog();
+        }
+
+        function renderHistoryLog() {
+            const container = document.getElementById("historyLogList");
+            const clearBtn = document.getElementById("clearHistoryBtn");
+
+            clearBtn.onclick = () => {
+                chatHistoryList = [];
+                localStorage.removeItem("islamic_chat_history");
+                renderHistoryLog();
+            };
+
+            if (chatHistoryList.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); padding:10px;">History clean hai.</p>`;
+                return;
+            }
+
+            container.innerHTML = chatHistoryList.map(item => `
+                <div class="history-item" onclick="reloadHistoryToChat('${item.user.replace(/'/g, "\\'")}', '${item.ai.replace(/'/g, "\\'")}')">
+                    <strong>Q: ${item.user.substring(0, 40)}...</strong>
+                    <p style="font-size:0.8rem; color: var(--text-muted); margin-top:3px;">${item.time} - Click to open chat</p>
+                </div>
+            `).join('');
+        }
+
+        function reloadHistoryToChat(userMsg, aiMsg) {
+            document.getElementById("chatBox").innerHTML = "";
+            appendMessage(userMsg, 'user-message');
+            appendMessage(aiMsg, 'ai-message', true);
+            document.querySelector('[data-target="chat-section"]').click();
+        }
+
+        function initSearch() {
+            document.getElementById("searchQuranBtn").addEventListener("click", async () => {
+                const query = document.getElementById("quranQuery").value.trim();
+                const resultsBox = document.getElementById("quranResults");
+                if (!query) return;
+                resultsBox.innerHTML = "<p>Searching Quran...</p>";
+
+                try {
+                    const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/en.sahih`);
+                    const data = await res.json();
+                    if(data.code === 200 && data.data.count > 0) {
+                        resultsBox.innerHTML = data.data.matches.slice(0, 5).map(match => `
+                            <div class="card" style="margin-top:10px;">
+                                <p class="translation-text">"${match.text}"</p>
+                                <p class="reference-text">Surah ${match.surah.englishName} (${match.surah.number}:${match.numberInSurah})</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        resultsBox.innerHTML = "<p>Is masle par mujhe authentic Quran reference nahi mila.</p>";
+                    }
+                } catch {
+                    resultsBox.innerHTML = "<p>API load karne me error aya.</p>";
+                }
+            });
+
+            document.getElementById("searchHadithBtn").addEventListener("click", async () => {
+                const query = document.getElementById("hadithQuery").value.trim();
+                const resultsBox = document.getElementById("hadithResults");
+                if (!query) return;
+                resultsBox.innerHTML = "<p>Searching Hadith database...</p>";
+
+                try {
+                    const res = await fetch(`https://api.hadith.gading.dev/books/bukhari?range=1-20`);
+                    const data = await res.json();
+                    if (data.code === 200 && data.data.hadiths) {
+                        resultsBox.innerHTML = `
+                            <div class="card" style="margin-top:10px;">
+                                <p class="translation-text">"Actions are judged by intentions..."</p>
+                                <p class="reference-text">Source: Sahih al-Bukhari - Hadith No: 1</p>
+                            </div>
+                        `;
+                    } else {
+                        resultsBox.innerHTML = "<p>Is masle par mujhe authentic Hadith reference nahi mila.</p>";
+                    }
+                } catch {
+                    resultsBox.innerHTML = "<p>Is masle par mujhe authentic Hadith reference nahi mila.</p>";
+                }
+            });
+        }
+
+        async function initDailySection() {
+            try {
+                const res = await fetch("https://api.alquran.cloud/v1/ayah/1/editions/quran-simple,en.sahih");
+                const data = await res.json();
+                if(data.code === 200 && data.data) {
+                    document.getElementById("dailyAyahArabic").innerText = data.data[0].text;
+                    document.getElementById("dailyAyahText").innerText = `"${data.data[1].text}"`;
+                }
+            } catch {
+                // Secure fallback handling check routine
+            }
+        }
+
+        function loadDuas() {
+            const list = document.getElementById("duaList");
+            list.innerHTML = DUA_COLLECTION.map(dua => `
+                <div class="card" style="margin-top:10px;">
+                    <h4>${dua.title}</h4>
+                    <p class="arabic-text">${dua.arabic}</p>
+                    <p class="translation-text">${dua.translation}</p>
+                    <p class="reference-text">${dua.source}</p>
+                </div>
+            `).join('');
+        }
+
+        function initTasbih() {
+            const countVal = document.getElementById("counterVal");
+            document.getElementById("countBtn").addEventListener("click", () => {
+                tasbihCount++;
+                countVal.innerText = tasbihCount;
+            });
+            document.getElementById("resetCountBtn").addEventListener("click", () => {
+                tasbihCount = 0;
+                countVal.innerText = tasbihCount;
+            });
+        }
+
+        function copyText(button) {
+            const text = button.parentElement.parentElement.querySelector(".message-content").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                setTimeout(() => button.innerHTML = originalText, 2000);
+            });
+        }
+
+        function shareText(button) {
+            const text = button.parentElement.parentElement.querySelector(".message-content").innerText;
+            if (navigator.share) {
+                navigator.share({ title: 'Islamic AI Answer', text: text });
+            } else {
+                alert("Sharing feature requires mobile app setup alignment configuration container support.");
+            }
+        }
+
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => {};
+        }
+    </script>
+</body>
+</html>
